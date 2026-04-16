@@ -3,4 +3,5 @@ libgl1
 tesseract-ocr
 tesseract-ocr-eng
 tesseract-ocr-hin
+tesseract-ocr-tam
 libgl1
