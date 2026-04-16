@@ -4,16 +4,22 @@ import numpy as np
 import pytesseract
 from PIL import Image
 
-st.set_page_config(page_title="Advanced OCR App", layout="centered")
+st.set_page_config(page_title="Multi-Language OCR", layout="centered")
 
-st.title("📄 Advanced Text Detection & OCR")
-st.write("Upload image → detect text → extract → download")
+st.title("📄 Smart Document Scanner & OCR")
+st.write("Auto-detect language + extract text + download")
 
-# Language selection
-lang = st.selectbox("🌐 Select Language", ["eng", "hin", "fra", "spa","tam"])
+# Mode selection
+mode = st.radio("Select Mode", ["Auto Detect", "Manual Select"])
+
+# Manual language option
+if mode == "Manual Select":
+    lang = st.selectbox("🌐 Select Language", ["eng", "hin", "tam", "kan"])
+else:
+    lang = "eng+hin+tam+kan"   # multi-language auto detection
 
 # Upload image
-uploaded_file = st.file_uploader("📤 Upload Image", type=["png", "jpg", "jpeg"])
+uploaded_file = st.file_uploader("📤 Upload Document", type=["png", "jpg", "jpeg"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
@@ -22,29 +28,42 @@ if uploaded_file is not None:
     st.subheader("📷 Original Image")
     st.image(image, use_column_width=True)
 
-    # Convert to grayscale
+    # --- Document Scanner Effect ---
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    thresh = cv2.adaptiveThreshold(
+        blur, 255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11, 2
+    )
 
-    # Threshold
-    thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)[1]
-
-    st.subheader("🧹 Processed Image")
+    st.subheader("📄 Scanned Document")
     st.image(thresh, use_column_width=True)
 
-    # OCR with bounding boxes
-    data = pytesseract.image_to_data(thresh, lang=lang, output_type=pytesseract.Output.DICT)
+    # --- OCR with Bounding Boxes ---
+    data = pytesseract.image_to_data(
+        thresh,
+        lang=lang,
+        config='--psm 6',
+        output_type=pytesseract.Output.DICT
+    )
 
     n_boxes = len(data['text'])
     extracted_text = ""
 
     for i in range(n_boxes):
         if int(data['conf'][i]) > 60:
-            (x, y, w, h) = (data['left'][i], data['top'][i],
-                            data['width'][i], data['height'][i])
+            (x, y, w, h) = (
+                data['left'][i],
+                data['top'][i],
+                data['width'][i],
+                data['height'][i]
+            )
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
             extracted_text += data['text'][i] + " "
 
-    st.subheader("📦 Text Detection (Bounding Boxes)")
+    st.subheader("📦 Detected Text Regions")
     st.image(img, use_column_width=True)
 
     st.subheader("🔠 Extracted Text")
