@@ -6,7 +6,7 @@ from PIL import Image
 
 st.set_page_config(page_title="Multi-Language OCR", layout="centered")
 
-st.title("📄 Smart Document Scanner & OCR")
+st.title("Smart Document Scanner & OCR")
 st.write("Auto-detect language + extract text + download")
 
 # Mode selection
