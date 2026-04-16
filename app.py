@@ -10,7 +10,7 @@ st.title("📄 Advanced Text Detection & OCR")
 st.write("Upload image → detect text → extract → download")
 
 # Language selection
-lang = st.selectbox("🌐 Select Language", ["eng", "hin", "fra", "spa"])
+lang = st.selectbox("🌐 Select Language", ["eng", "hin", "fra", "spa","tam"])
 
 # Upload image
 uploaded_file = st.file_uploader("📤 Upload Image", type=["png", "jpg", "jpeg"])
